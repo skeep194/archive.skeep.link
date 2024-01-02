@@ -1,27 +1,58 @@
 import type { GatsbyConfig } from 'gatsby'
+import metadata from './site-metadata'
+import { remarkCodeHike } from '@code-hike/mdx'
 
 const config: GatsbyConfig = {
-  siteMetadata: {
-    title: `RedMage`,
-    siteUrl: `https://www.yourdomain.tld`,
-  },
-  // More easily incorporate content into your pages through automatic TypeScript type generation and better GraphQL IntelliSense.
-  // If you use VSCode you can also use the GraphQL plugin
-  // Learn more at: https://gatsby.dev/graphql-typegen
+  siteMetadata: metadata,
   graphqlTypegen: true,
   plugins: [
     'gatsby-plugin-postcss',
-    // 'gatsby-plugin-google-gtag',
+    {
+      resolve: 'gatsby-plugin-google-gtag',
+      options: {
+        trackingIds: ['G-N2CEM3WYG4'],
+      },
+    },
     'gatsby-plugin-image',
     'gatsby-plugin-sitemap',
     {
-      resolve: 'gatsby-plugin-manifest',
-
+      resolve: `gatsby-plugin-manifest`,
       options: {
-        icon: 'src/images/icon.png',
+        name: metadata.title,
+        short_name: metadata.title,
+        description: metadata.description,
+        start_url: `/`,
+        background_color: `#f7f0eb`,
+        theme_color: `#a2466c`,
+        display: `standalone`,
+        icon: `src/images/icon.png`,
       },
     },
-    'gatsby-plugin-mdx',
+    {
+      resolve: 'gatsby-plugin-mdx',
+      options: {
+        extensions: [`.mdx`, `.md`],
+        mdxOptions: {
+          remarkPlugins: [
+            [remarkCodeHike, { theme: 'github-dark', lineNumbers: true }],
+          ],
+        },
+        gatsbyRemarkPlugins: [
+          {
+            resolve: `gatsby-remark-images`,
+            options: {
+              maxWidth: 500,
+            },
+          },
+          {
+            resolve: `gatsby-remark-katex`,
+            options: {
+              strict: `ignore`,
+            },
+          },
+        ],
+      },
+    },
     'gatsby-plugin-sharp',
     'gatsby-transformer-sharp',
     {
@@ -40,7 +71,18 @@ const config: GatsbyConfig = {
       },
       __key: 'pages',
     },
+    {
+      resolve: 'gatsby-plugin-robots-txt',
+      options: {
+        host: metadata.siteUrl,
+        sitemap: metadata.sitemap,
+        policy: [{ userAgent: '*', allow: '/' }],
+      },
+    },
   ],
+  flags: {
+    DEV_SSR: true,
+  },
 }
 
 export default config
